@@ -19,7 +19,7 @@ struct GestaltView: View {
     @State private var isGestaltVaild: Bool = false
     
     @State private var mgSubtype: Int = 0
-    @AppStorage("mgOriginalSubtype") private var mgOriginalSubtype: Int = 0
+    @State private var mgOriginalSubtype: Int = 0
     @State private var mgEnableDeviceName: Bool = false
     @AppStorage("mgDeviceName") private var mgDeviceName: String = ""
     @State private var mgProductType: String = ""
@@ -252,9 +252,13 @@ struct GestaltView: View {
             
             guard let subType = ArtworkDict["ArtworkDeviceSubType"] as? Int else { throw "Failed to get ArtworkDeviceSubType!" }
             mgSubtype = subType
-            
-            if mgOriginalSubtype == 0 {
-                mgOriginalSubtype = subType
+            mgOriginalSubtype = subType
+
+            let currentCacheExtra = mgCurrentDict["CacheExtra"] as? NSMutableDictionary ?? NSMutableDictionary()
+            if let productType = currentCacheExtra["h9jDsbgj7xIVeIQ8S3/X3Q"] as? String, !productType.isEmpty {
+                mgProductType = productType
+            } else {
+                mgProductType = machineName()
             }
             
             guard let deviceName = ArtworkDict["ArtworkDeviceProductDescription"] as? String else { throw "Failed to get ArtworkDeviceProductDescription!" }
@@ -277,7 +281,9 @@ struct GestaltView: View {
         do {
             // first, update the dictionary with some specific properties.
             let cacheExtra = mgCurrentDict["CacheExtra"] as? NSMutableDictionary ?? NSMutableDictionary()
-            cacheExtra["h9jDsbgj7xIVeIQ8S3/X3Q"] = mgProductType
+            if !mgProductType.isEmpty {
+                cacheExtra["h9jDsbgj7xIVeIQ8S3/X3Q"] = mgProductType
+            }
             
             let ArtworkDict = cacheExtra["oPeik/9e8lQWMszEjbPzng"] as? NSMutableDictionary ?? NSMutableDictionary()
             ArtworkDict["ArtworkDeviceSubType"] = mgSubtype
