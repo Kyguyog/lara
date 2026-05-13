@@ -250,11 +250,13 @@ struct GestaltView: View {
             let cacheExtra = mgSavedDict["CacheExtra"] as? NSMutableDictionary ?? NSMutableDictionary()
             let ArtworkDict = cacheExtra["oPeik/9e8lQWMszEjbPzng"] as? NSMutableDictionary ?? NSMutableDictionary()
             
-            guard let subType = ArtworkDict["ArtworkDeviceSubType"] as? Int else { throw "Failed to get ArtworkDeviceSubType!" }
-            mgSubtype = subType
-            mgOriginalSubtype = subType
+            guard let originalSubType = ArtworkDict["ArtworkDeviceSubType"] as? Int else { throw "Failed to get ArtworkDeviceSubType!" }
+            mgOriginalSubtype = originalSubType
 
             let currentCacheExtra = mgCurrentDict["CacheExtra"] as? NSMutableDictionary ?? NSMutableDictionary()
+            let currentArtworkDict = currentCacheExtra["oPeik/9e8lQWMszEjbPzng"] as? NSMutableDictionary ?? NSMutableDictionary()
+            mgSubtype = currentArtworkDict["ArtworkDeviceSubType"] as? Int ?? originalSubType
+
             if let productType = currentCacheExtra["h9jDsbgj7xIVeIQ8S3/X3Q"] as? String, !productType.isEmpty {
                 mgProductType = productType
             } else {
