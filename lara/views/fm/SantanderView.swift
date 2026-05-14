@@ -523,12 +523,14 @@ private struct santanderdirview: View {
                 Text(entry.display)
                     .foregroundColor(entry.name.hasPrefix(".") ? .gray : .primary)
                     .lineLimit(1)
+                    .truncationMode(.middle)
 
                 if !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     Text(entry.path)
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .lineLimit(1)
+                        .truncationMode(.middle)
                 }
             }
 
@@ -1005,17 +1007,13 @@ private enum santanderfs {
         do {
             let names = try fm.contentsOfDirectory(atPath: item.path)
             let mode = fmAppsDisplayMode(rawValue: UserDefaults.standard.string(forKey: "selectedFmAppsDisplayMode") ?? "") ?? .appName
-            let datadirs = [
-                "/private/var/mobile/Containers/Data/Application",
-                "/var/mobile/Containers/Data/Application"
-            ]
             let bundledirs = [
                 "/private/var/containers/Bundle/Application",
                 "/var/containers/Bundle/Application"
             ]
             var appnames: [String: String] = [:]
 
-            if mode == .appName && datadirs.contains(item.path) {
+            if mode == .appName {
                 appnames = appnamecache()
             }
 
@@ -1025,15 +1023,18 @@ private enum santanderfs {
                 fm.fileExists(atPath: full, isDirectory: &isdir)
                 var display = name
 
-                if (bundledirs + datadirs).contains(item.path) {
-                    if mode == .appName {
-                        if bundledirs.contains(item.path) {
-                            display = bundleappname(at: full) ?? name
-                        } else if let bundleid = bundleidforcontainer(at: full) {
+                if mode != .UUID, isdir.boolValue {
+                    if bundledirs.contains(item.path), mode == .appName {
+                        display = bundleappname(at: full) ?? name
+                    } else if let bundleid = bundleidforcontainer(at: full) {
+                        switch mode {
+                        case .appName:
                             display = appnames[bundleid] ?? bundleid
+                        case .bundleID:
+                            display = bundleid
+                        case .UUID:
+                            break
                         }
-                    } else if mode == .bundleID, let bundleid = bundleidforcontainer(at: full) {
-                        display = bundleid
                     }
                 }
 
