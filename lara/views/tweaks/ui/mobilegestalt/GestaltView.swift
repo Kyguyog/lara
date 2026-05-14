@@ -185,61 +185,6 @@ struct GestaltView: View {
         }
     }
     
-    // hope it works, im NOT testing ts
-    private func verifymg(_ plist: Any, targetPath: String = mgCurrentPath) throws -> Data {
-        let fm = FileManager.default
-        
-        if fm.fileExists(atPath: targetPath) {
-            let attrs = try fm.attributesOfItem(atPath: targetPath)
-            if let current = attrs[.size] as? NSNumber,
-               current.intValue == 0 {
-                Alertinator.shared.alert(
-                    title: "Dangerous MobileGestalt State Detected",
-                    body: "The current MobileGestalt file is already 0 bytes. Overwriting has been aborted to prevent corruption."
-                )
-                throw "Current MobileGestalt file is 0 bytes."
-            }
-        }
-        
-        guard PropertyListSerialization.propertyList(plist, isValidFor: .binary) else {
-            Alertinator.shared.alert(
-                title: "Invalid Property List",
-                body: "The MobileGestalt plist is invalid and cannot be written safely."
-            )
-            throw "Invalid plist structure."
-        }
-        
-        let data = try PropertyListSerialization.data(
-            fromPropertyList: plist,
-            format: .binary,
-            options: 0
-        )
-        
-        if data.isEmpty || data.count == 0 {
-            Alertinator.shared.alert(
-                title: "Refusing Empty MobileGestalt Write",
-                body: "The generated MobileGestalt plist would become 0 bytes after overwrite. Operation cancelled."
-            )
-            throw "Serialized plist data is empty."
-        }
-        
-        do {
-            _ = try PropertyListSerialization.propertyList(
-                from: data,
-                options: [],
-                format: nil
-            )
-        } catch {
-            Alertinator.shared.alert(
-                title: "Invalid Serialized Property List",
-                body: "The generated MobileGestalt plist failed validation after serialization."
-            )
-            throw "Serialized plist validation failed."
-        }
-        
-        return data
-    }
-    
     private func loadCurrentGestalt() {
         do {
             mgCurrentDict = try NSMutableDictionary(contentsOf: URL(fileURLWithPath: mgCurrentPath), error: ())
@@ -312,7 +257,7 @@ struct GestaltView: View {
             if !vaildateCacheExtra(mgCurrentDict) { throw "MobileGestalt is not vaild! Please restart the app." }
             
             // bro please dont bootloop
-            let mgData = try verifymg(mgCurrentDict)
+            let mgData = try verifyPlist(mgCurrentDict, targetPath: mgCurrentPath)
             let result = mgr.lara_overwritefile(target: mgCurrentPath, data: mgData)
             
             if result.ok {
@@ -332,7 +277,7 @@ struct GestaltView: View {
             
             if FileManager.default.fileExists(atPath: mgSavedURL.path) {
                 let restored = try NSMutableDictionary(contentsOf: mgSavedURL, error: ())
-                _ = try verifymg(restored)
+                _ = try verifyPlist(restored, targetPath: mgCurrentPath)
                 mgCurrentDict = restored
             } else {
                 throw "No MobileGestalt file found!"
@@ -473,4 +418,58 @@ struct GestaltView: View {
 #Preview {
     GestaltView()
         .environmentObject(laramgr())
+}
+
+func verifyPlist(_ plist: Any, targetPath: String) throws -> Data {
+    let fm = FileManager.default
+    
+    if fm.fileExists(atPath: targetPath) {
+        let attrs = try fm.attributesOfItem(atPath: targetPath)
+        if let current = attrs[.size] as? NSNumber,
+           current.intValue == 0 {
+            Alertinator.shared.alert(
+                title: "Dangerous Plist State Detected",
+                body: "The current plist file is already 0 bytes. Overwriting has been aborted to prevent corruption."
+            )
+            throw "Current MobileGestalt file is 0 bytes."
+        }
+    }
+    
+    guard PropertyListSerialization.propertyList(plist, isValidFor: .binary) else {
+        Alertinator.shared.alert(
+            title: "Invalid Property List",
+            body: "The plist is invalid and cannot be written safely."
+        )
+        throw "Invalid plist structure."
+    }
+    
+    let data = try PropertyListSerialization.data(
+        fromPropertyList: plist,
+        format: .binary,
+        options: 0
+    )
+    
+    if data.isEmpty || data.count == 0 {
+        Alertinator.shared.alert(
+            title: "Refusing Empty Plist Write",
+            body: "The generated plist would become 0 bytes after overwrite. Operation cancelled."
+        )
+        throw "Serialized plist data is empty."
+    }
+    
+    do {
+        _ = try PropertyListSerialization.propertyList(
+            from: data,
+            options: [],
+            format: nil
+        )
+    } catch {
+        Alertinator.shared.alert(
+            title: "Invalid Serialized Property List",
+            body: "The generated plist failed validation after serialization."
+        )
+        throw "Serialized plist validation failed."
+    }
+    
+    return data
 }
