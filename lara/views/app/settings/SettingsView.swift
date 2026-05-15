@@ -79,8 +79,9 @@ struct SettingsView: View {
                                 let fetched = fetchkcache()
 
                                 if fetched {
+                                    let dlkc = dlkcache()
                                     DispatchQueue.main.async {
-                                        mgr.hasOffsets = true
+                                        mgr.hasOffsets = dlkc
                                         dlingkcache = false
                                     }
                                     return
