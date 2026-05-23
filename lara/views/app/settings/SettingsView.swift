@@ -43,6 +43,7 @@ struct SettingsView: View {
     @AppStorage("loggerNoBS") private var loggerNoBS: Bool = true
     
     @AppStorage("showFMInTabs") private var showFMInTabs: Bool = true
+    @AppStorage("showTerminalInTabs") private var showTerminalInTabs: Bool = true
     @AppStorage("selectedFMAppsDisplayMode") private var selectedFMAppsDisplayMode: fmAppsDisplayMode = .appName
     @AppStorage("fmRecursiveSearch") private var fmRecursiveSearch: Bool = false
     
@@ -199,6 +200,7 @@ struct SettingsView: View {
                     .pickerStyle(.menu)
                     Toggle("Recursive Search in File Manager", isOn: $fmRecursiveSearch)
                     Toggle("Show File Manager in Tabs", isOn: $showFMInTabs)
+                    Toggle("Show Terminal in Tabs", isOn: $showTerminalInTabs)
                 }
                 
                 #if !DISABLE_REMOTECALL

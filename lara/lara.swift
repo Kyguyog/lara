@@ -9,7 +9,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 enum taboptions {
-    case applying, tweaks, files, logs
+    case applying, tweaks, files, terminal, logs
 }
 
 let g_isunsupported: Bool = isunsupported()
@@ -23,6 +23,7 @@ struct lara: App {
     @AppStorage("selectedMethod") private var selectedMethod: method = .hybrid
     @AppStorage("keepAlive") private var keepalive: Bool = false
     @AppStorage("showFMInTabs") private var showfmintabs: Bool = true
+    @AppStorage("showTerminalInTabs") private var showterminalintabs: Bool = true
     @AppStorage("logsdisplaymode") private var logsdisplaymode: logsdisplaymode = .toolbar
     @State private var selectedtab: taboptions = .applying
     
@@ -67,6 +68,14 @@ struct lara: App {
                             Image(systemName: "folder.fill")
                         }
                         .tag(taboptions.files)
+                }
+                
+                if showterminalintabs {
+                    TerminalView()
+                        .tabItem {
+                            Image(systemName: "terminal.fill")
+                        }
+                        .tag(taboptions.terminal)
                 }
                 
                 // this too
