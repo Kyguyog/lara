@@ -20,13 +20,13 @@ class ShellRunner {
             posix_spawn_file_actions_adddup2(&fileActions, pipe.fileHandleForWriting.fileDescriptor, STDERR_FILENO)
             posix_spawn_file_actions_addclose(&fileActions, pipe.fileHandleForReading.fileDescriptor)
 
-            let argv: [UnsafeMutablePointer<CChar>?] = [
+            var argv: [UnsafeMutablePointer<CChar>?] = [
                 strdup("/bin/sh"),
                 strdup("-c"),
                 strdup(command),
                 nil
             ]
-            let envp: [UnsafeMutablePointer<CChar>?] = [
+            var envp: [UnsafeMutablePointer<CChar>?] = [
                 strdup("PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"),
                 strdup("HOME=/var/root"),
                 strdup("TERM=xterm"),
