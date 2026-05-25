@@ -275,7 +275,7 @@ struct DecryptView: View {
             }
 
             let mainBinary = destAppPath + "/" + app.executable
-            let mainRet = decrypt_binary_pid(mainBinary, pid, mainBinary)
+            let mainRet = decrypt_binary_pid((app.bundlepath + "/" + app.executable), pid, mainBinary)
             guard mainRet == 0 else {
                 DispatchQueue.main.async {
                     decryptingbid = nil
