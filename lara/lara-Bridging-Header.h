@@ -16,6 +16,7 @@
 #import "IconServices.h"
 #import "rc.h"
 #import "RemoteCall.h"
+#import "persistence.h"
 
 #import <zlib.h>
 
